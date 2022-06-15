@@ -1,0 +1,6 @@
+automata-lib
+numpy
+graphviz
+termcolor
+sklearn
+tqdm
