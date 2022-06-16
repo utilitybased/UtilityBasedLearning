@@ -16,67 +16,11 @@ from typing import Set, Generator, Tuple, Union, Any
 
 class CommonUtils:
     @staticmethod
-    def _choose(blue: Set[State]) -> State:
-        """
-        A deterministic function that chooses one of the
-        elements in the given blue set. It does so by
-        choosing the minimal <u, a> in lexicographic order.
-
-        :param blue: Set of blue states
-        :type blue: Set[State]
-        :return: One of the elements in the given blue set
-        :rtype: State
-        """
-        return min(blue, key=functools.cmp_to_key(CommonUtils._cmp))
-
-    @staticmethod
-    def _cmp(q1: State, q2: State) -> int:
-        """
-        Compares two states by comparing the
-        name (string value of the state). If the
-        two strings have the same length, then the
-        two strings are compared lexicographically.
-
-        :param q1: state 1
-        :type q1: State
-        :param q2: state 2
-        :type q2: State
-        :return: 1 of a is greater than b, 0 if a
-                 is equal to b and -1 if a is less
-                 than b.
-        :rtype: int
-        """
-        if len(q1.name) == len(q2.name):
-            if q1.name > q2.name:
-                return 1
-            elif q1.name < q2.name:
-                return -1
-            else:
-                return 0
-        elif len(q1.name) > len(q2.name):
-            return 1
-        else:
-            return -1
-
-    @staticmethod
     def build_pta_from_blackbox(blackboxProc: Process,
                                 blackbox: DFA,
                                 num_iterations: int,
-                                episode_len: int,
-                                bPositiveOnly: bool = True,
-                                bNegativeOnly: bool = False) -> Tuple[
+                                episode_len: int) -> Tuple[
         PTA, Set[Union[str, Any]], Set[Union[str, Any]]]:
-        """
-        Function that builds a prefix tree acceptor from the example strings
-        S = S+ union S-
-
-        :param s_plus: Set containing positive examples of the target language
-        :type s_plus: set
-        :param s_minus: Set containing negative examples of the target language
-        :type s_minus: set
-        :return: An dfa representing a prefix tree acceptor
-        :rtype: DFA
-        """
         s_plus = set()
         s_minus = set()
 
@@ -88,19 +32,8 @@ class CommonUtils:
                     s_plus.add(step[0])
                 else:
                     s_minus.add(step[0])
-            # random_str = ''.join(random.choice(list(blackbox.input_symbols)) for i in
-            #                      range(random.randint(0, episode_len)))
-            # if blackbox.accepts_input(random_str):
-            #     s_plus.add(random_str)
-            # else:
-            #     s_minus.add(random_str)
 
-        if not bPositiveOnly and not bNegativeOnly:
-            samples = s_plus.union(s_minus)
-        elif bPositiveOnly:
-            samples = s_plus
-        elif bNegativeOnly:
-            samples = s_minus
+        samples = s_plus
 
         alphabet = blackbox.input_symbols#CommonUtils.determine_alphabet(samples)
         pta = PTA(alphabet)
@@ -130,8 +63,6 @@ class CommonUtils:
             # if not bNegativeOnly and blackbox.accepts_input(u.name):
             if blackbox.accepts_input(u.name):
                 pta.pos_states.add(u)
-            if ((not bNegativeOnly and not bPositiveOnly) or bNegativeOnly) and not blackbox.accepts_input(u.name):
-                pta.neg_states.add(u)
 
         pta.states = states
 
@@ -139,21 +70,6 @@ class CommonUtils:
 
     @staticmethod
     def prefix_set(s: Set[str]) -> Generator:
-        """
-        Calculates the prefix set of the set s given the
-        alphabet.
-
-        >>> s = {'aaa', 'bbb', 'aba'}
-        >>> print(' '.join(prefix_set(s)))
-         b a bb ab aa bbb aba aaa
-
-        :param s: The set fo calculate the prefix set on
-        :type s: set
-        :param alphabet: Alphabet of the regular language
-        :type alphabet: set
-        :return: Generator with all the prefixes
-        :rtype: Generator[str]
-        """
         for w in s:
             for i in range(len(w) + 1):
                 yield w[:i]
@@ -183,22 +99,6 @@ class CommonUtils:
 
     @staticmethod
     def determine_alphabet(s: Set[str]) -> Set[str]:
-        """
-        Calculates the alphabet (Sigma) of the target
-        regular language.
-
-        >>> s = {'abc', 'cba', 'bca', 'a', 'b', 'c', 'aa', 'bb', 'cc', 'd'}
-        >>> print(determine_alphabet(s))
-        {'b', 'd', 'c', 'a'}
-
-        :param s: Set containing positive and negative
-                  example strings of the target regular
-                  language.
-        :type s: Set[str]
-        :return: Set containing the unique alphabet of the
-                 regular language.
-        :rtype: Set[str]
-        """
         return set(''.join(s))
 
     @staticmethod
@@ -303,7 +203,6 @@ class RLUtility(object):
         # V1 is the "good" clustering while V2 use for compatible only
         V1 = {pre: val for (pre, val) in V.items() if len(pre) <= params.STATE_LEN}
         V2 = V
-
 
         print("Number of accepting strings: {}".format(len(accepting_prefixes)))
         print("Number of rejecting strings: {}".format(len(rejecting_prefixes)))

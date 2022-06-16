@@ -1,14 +1,9 @@
 import random
 import sys
-from itertools import combinations
-
 from termcolor import colored
 from automata.fa.dfa import DFA
 import platform
 from pathlib import Path
-from sklearn.cluster import DBSCAN
-from collections import defaultdict
-import numpy as np
 from PTA import PTA
 from RLUtility import RLUtility, CommonUtils
 from RPNI import RPNI
@@ -167,7 +162,7 @@ def find_optimum_run(episode_len_param: int, num_iterations_param: int, validate
 
 
 if __name__ == '__main__':
-    dfa, params = example29(RPNI=True, Dual=False)
+    dfa, params = example27(RPNI=True, Dual=False)
     validate_iter = 10
     episode_len = params.episode_len
     num_iterations = params.num_iterations
